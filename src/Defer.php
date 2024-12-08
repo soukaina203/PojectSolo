@@ -42,12 +42,11 @@ class Defer
     }
 
     // Méthode statique init pour initialiser l'objet avec un callback et ses arguments.
-    public static function init(string $callable, array $args = []): self
+    public static function init(string $callable, array $args = [], Defer &$deferInstance): void
     {
         // Crée une instance de Defer et ajoute un callback via defer().
-        $instance = new self();
-        $instance->defer($callable, $args);
-        return $instance;
+        $deferInstance = new self();  // Instancie Defer dans la variable passée par référence
+        $deferInstance->defer($callable, $args);
     }
 
     // Méthode magique __invoke pour permettre un appel direct de l'objet comme une fonction.
@@ -76,19 +75,3 @@ class Defer
     }
 }
 
-// Fonction pour tester le comportement de defer.
-function tryDefer()
-{
-    // Initialisation d'un objet Defer avec un callback 'add' et des arguments.
-    $defer = Defer::init('add', [1, 2]); 
-
-    // Utilisation de __invoke pour ajouter un autre callback 'sub' et des arguments.
-    $defer('sub', [1, 2]);  // Cela appelle __invoke(), qui appelle defer().
-
-    // Les résultats attendus :
-    // 'add' => 1 + 2 = 3
-    // 'sub' => 1 - 2 = -1
-}
-
-// Appel de la fonction de test.
-tryDefer();

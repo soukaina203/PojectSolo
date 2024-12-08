@@ -14,18 +14,13 @@ class FibonacciSequence implements Iterator
     {
         $this->start = $start;
         $this->length = $length;
-
-        // Pre-calculate the Fibonacci sequence based on the range
-        for ($i = $this->start; $i <= $this->length; $i++) {
-            $this->optimizedCalcul($i); // Calculate Fibonacci number for this index
-        }
     }
 
-    // Optimized calculation to calculate Fibonacci numbers up to a given index
+    // Optimized calculation to calculate Fibonacci numbers lazily
     private function optimizedCalcul(int $index): void
     {
-        // Ensure we calculate Fibonacci numbers up to the requested index
-        for ($i = count($this->sequence); $i < $index; $i++) {
+        // Calculate Fibonacci numbers up to the requested index, if not already cached
+        for ($i = count($this->sequence); $i <= $index; $i++) {
             if ($i === 0) {
                 $this->sequence[0] = 0;
             } elseif ($i === 1) {
@@ -40,7 +35,9 @@ class FibonacciSequence implements Iterator
     // Iterator interface methods
     public function current(): mixed
     {
-        return $this->sequence[$this->index];
+        // Ensure we calculate the Fibonacci number at the current index
+        $this->optimizedCalcul($this->start + $this->index);
+        return $this->sequence[$this->start + $this->index];
     }
 
     public function key(): mixed
@@ -78,37 +75,34 @@ class FibonacciSequence implements Iterator
     // Static method to get a range of Fibonacci numbers starting from a given index
     public static function range(int $start, int $length): self
     {
-        return new self($start, $length); // Start from given index, calculate 'length' terms
+        return new self($start, $length); // Start from the specified index, calculate 'length' terms
     }
 }
 
 // Testing the FibonacciIterator
 
-echo "Fibonacci (first 10 terms):\n";
-$fibonacciFirst = FibonacciSequence::first(10);  // First 10 terms
+echo "Fibonacci (first 5 terms):\n";
+$fibonacciFirst = FibonacciSequence::first(5);  // First 5 terms
 foreach ($fibonacciFirst as $index => $value) {
     echo "Index $index : $value\n";
 }
+// Expected output:
+// Index 0 : 0
+// Index 1 : 1
+// Index 2 : 1
+// Index 3 : 2
+// Index 4 : 3
 
 echo "\nFibonacci (range starting at index 5 for 5 terms):\n";
 $fibonacciRange = FibonacciSequence::range(5, 5);  // Start at index 5, next 5 terms
 foreach ($fibonacciRange as $index => $value) {
     echo "Index $index : $value\n";
 }
+// Expected output:
+// Index 0 : 5
+// Index 1 : 8
+// Index 2 : 13
+// Index 3 : 21
+// Index 4 : 34
 
-// $fibonacci = new FibonacciSequence(9);
-// $fibonacci->optimizedCalcul(0);
-// echo "Index 0 : " . $fibonacci->getSequence()[0] . PHP_EOL;
-
-// // Calcul du deuxième terme
-// $fibonacci->optimizedCalcul(1);
-// echo "Index 1 : " . $fibonacci->getSequence()[1] . PHP_EOL;
-
-// // Calcul d'un terme plus loin dans la suite
-// $fibonacci->optimizedCalcul(12);
-// echo "Index 5 : " . $fibonacci->getSequence()[12] . PHP_EOL;
-
-// // Vérifiez l'état complet de la suite après ces calculs
-// echo "Suite calculée : " . implode(", ", $fibonacci->getSequence()) . PHP_EOL;
 ?>
-
