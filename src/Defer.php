@@ -1,77 +1,68 @@
 <?php
 
 declare(strict_types=1);
+namespace Solo312;
 
-// Classe Callback pour gérer les callbacks et leurs arguments.
+// Callback class to manage callbacks and their arguments.
 class Callback
 {
-    // Le constructeur prend un callable et un tableau d'arguments.
+    // Constructor that takes a callable and an array of arguments.
     public function __construct(
-        private mixed $cb,  // Le callable à exécuter.
-        private array $args = []  // Les arguments à passer au callable.
+        private mixed $cb,  // The callable to execute.
+        private array $args = []  // The arguments to pass to the callable.
     ) {}
 
-    // Exécute le callable avec les arguments fournis.
+    // Executes the callable with the provided arguments.
     public function call(): void
     {
-        // Appelle le callable avec les arguments via call_user_func_array.
+        // Calls the callable with the arguments using call_user_func_array.
         call_user_func_array($this->cb, $this->args);
     }
 }
 
-// Deux exemples de fonctions qui seront utilisées comme callbacks.
-function add($a, $b)
-{
-    echo  $a + $b;
-}
 
-function sub($a, $b)
-{
-    echo $a - $b;
-}
 
-// Classe Defer qui gère l'ajout et l'exécution des callbacks.
+// Defer class to manage adding and executing callbacks.
 class Defer 
 {
-    // Tableau pour stocker les callbacks.
+    // Array to store the callbacks.
     private array $callableArray = [];
 
-    // Constructeur vide, sans initialisation nécessaire.
+    // Empty constructor, no initialization needed.
     public function __construct()
     {
     }
 
-    // Méthode statique init pour initialiser l'objet avec un callback et ses arguments.
-    public static function init(string $callable, array $args = [], Defer &$deferInstance): void
+    public static function init(callable $callable, array $args = []): self
     {
-        // Crée une instance de Defer et ajoute un callback via defer().
-        $deferInstance = new self();  // Instancie Defer dans la variable passée par référence
-        $deferInstance->defer($callable, $args);
+        // Creates a Defer instance and adds a callback via defer().
+        $instance = new self();
+        $instance->defer($callable, $args);
+        return $instance;
     }
 
-    // Méthode magique __invoke pour permettre un appel direct de l'objet comme une fonction.
+    // Magic method __invoke to allow the object to be called directly as a function.
     public function __invoke(callable $callable, array $args = []): void
     {
-        // Ajoute le callback à la pile avec ses arguments.
+        // Adds the callback to the stack with its arguments.
         $this->defer($callable, $args);
     }
 
-    // Méthode pour ajouter un callback à la pile.
+    // Method to add a callback to the stack.
     public function defer(callable $callable, array $args = []): void
     {
-        // Crée un objet Callback et l'ajoute à la pile.
+        // Creates a Callback object and adds it to the stack.
         $callback = new Callback($callable, $args);
-        $this->callableArray[] = $callback;  // Utilisation de [] au lieu de array_push().
+        $this->callableArray[] = $callback;  
     }
 
-    // Destructeur appelé lorsque l'objet est détruit, exécutant tous les callbacks dans l'ordre inverse.
+    // Destructor called when the object is destroyed, executing all callbacks in reverse order.
     public function __destruct()
     {
-        // Parcours de la pile des callbacks dans l'ordre inverse (LIFO).
+        // Traverses the callback stack in reverse order (LIFO).
         for ($i = count($this->callableArray) - 1; $i >= 0; $i--) {
-            // Exécution de chaque callback.
+            // Executes each callback.
             $this->callableArray[$i]->call();
         }
     }
 }
-

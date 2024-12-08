@@ -1,6 +1,8 @@
 <?php
-
 declare(strict_types=1);
+namespace Solo312;
+
+use Iterator; // Add this line to import the correct PHP interface
 
 class FibonacciSequence implements Iterator
 {
@@ -79,30 +81,5 @@ class FibonacciSequence implements Iterator
     }
 }
 
-// Testing the FibonacciIterator
-
-echo "Fibonacci (first 5 terms):\n";
-$fibonacciFirst = FibonacciSequence::first(5);  // First 5 terms
-foreach ($fibonacciFirst as $index => $value) {
-    echo "Index $index : $value\n";
-}
-// Expected output:
-// Index 0 : 0
-// Index 1 : 1
-// Index 2 : 1
-// Index 3 : 2
-// Index 4 : 3
-
-echo "\nFibonacci (range starting at index 5 for 5 terms):\n";
-$fibonacciRange = FibonacciSequence::range(5, 5);  // Start at index 5, next 5 terms
-foreach ($fibonacciRange as $index => $value) {
-    echo "Index $index : $value\n";
-}
-// Expected output:
-// Index 0 : 5
-// Index 1 : 8
-// Index 2 : 13
-// Index 3 : 21
-// Index 4 : 34
 
 ?>

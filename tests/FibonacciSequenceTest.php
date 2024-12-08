@@ -1,10 +1,12 @@
 <?php
 
 declare(strict_types=1);
+namespace Tests;
 
 use PHPUnit\Framework\TestCase;
+use Solo312\FibonacciSequence; // Adjust the namespace
 
-final class FibonacciSequenceTest extends TestCase
+ class FibonacciSequenceTest extends TestCase
 {
     // Test de la méthode `first`
     public function testFirst()

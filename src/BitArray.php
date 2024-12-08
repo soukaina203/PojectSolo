@@ -1,7 +1,14 @@
 <?php
 
 declare(strict_types=1);
+namespace Solo312;
 
+use Iterator;
+use ArrayAccess;
+use Countable;
+use InvalidArgumentException;
+use IteratorAggregate;
+use Stringable;
 // Iterator implementation for iterating through BitArray
 class BitArrayIterator implements Iterator
 {
@@ -13,7 +20,7 @@ class BitArrayIterator implements Iterator
         $this->array = $array;
     }
 
-    // Returns the current element in the array
+    // Retu                                                                                              rns the current element in the array
     public function current(): mixed 
     {
         return $this->array[$this->index];
@@ -46,7 +53,7 @@ class BitArrayIterator implements Iterator
 }
 
 // Implementation of the BitArray class
-class BitArray implements ArrayAccess, IteratorAggregate
+class BitArray implements  ArrayAccess, Countable, IteratorAggregate, Stringable
 {
     private $bits = []; // Array to hold the bits
     private const BYTE_SIZE = 8; // Byte size for internal operations
@@ -63,7 +70,13 @@ class BitArray implements ArrayAccess, IteratorAggregate
         }
         $this->bits[$offset] = $value; // Set the value at the given offset
     }
-
+    public function getBits():array  {
+        return $this->bits;
+    }
+    public function setBits(array $value):array  {
+         $this->bits=$value;
+         return $this->bits;
+    }
     // Converts a binary string into a BitArray
     public static function fromString(string $from)
     {
@@ -93,7 +106,8 @@ class BitArray implements ArrayAccess, IteratorAggregate
     public static function fromInt(int $from)
     {
         $binaryString = decbin($from); // Convert the integer to a binary string
-        return self::fromString($binaryString); // Use fromString to create a BitArray
+        $bitArray=self::fromString($binaryString); // Use fromString to create a BitArray
+        return $bitArray;
     }
 
     // Slices a portion of the BitArray
@@ -126,7 +140,6 @@ class BitArray implements ArrayAccess, IteratorAggregate
     public function set(array $bits, int $start = 0): void
     {
         if (empty($bits)) {
-            echo "Empty array!";
             return;
         }
 
@@ -233,9 +246,3 @@ class BitArray implements ArrayAccess, IteratorAggregate
      }
 
 }
-$bits = BitArray::fromString("0b1010010111110000");
-$slices = $bits->getSlicesIterator(8);  // Slice size of 4
-
- foreach ($slices as $slice) {
-     echo gettype($slice) . ": " . $slice . PHP_EOL;
- }

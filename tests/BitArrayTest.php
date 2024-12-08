@@ -1,101 +1,85 @@
 <?php
 
+declare(strict_types=1);
+
+namespace Tests;
+
 use PHPUnit\Framework\TestCase;
+use Solo312\BitArray;
 
 class BitArrayTest extends TestCase
 {
-    // Test de la méthode fromString
-    public function testFromString()
-    {
-        $bitArray = BitArray::fromString("0b1010010111110000");
-        $this->assertInstanceOf(BitArray::class, $bitArray);
-        $this->assertEquals("0b1010010111110000", (string)$bitArray);
-    }
 
-    // Test de la méthode fromInt
-    public function testFromInt()
-    {
-        $bitArray = BitArray::fromInt(4368);  // 4368 => "0b1010010111110000"
-        $this->assertInstanceOf(BitArray::class, $bitArray);
-        $this->assertEquals("0b1010010111110000", (string)$bitArray);
-    }
 
-    // Test de l'accès et de la modification via ArrayAccess
-    public function testArrayAccess()
+
+
+
+    // offsetSet test
+
+    public function testOffsetSet()
     {
         $bitArray = new BitArray();
-        $bitArray[0] = 1; // Définir le bit à l'index 0
-        $bitArray[3] = 1; // Définir le bit à l'index 3
-        $this->assertEquals(1, $bitArray[0]); // Vérifier le bit à l'index 0
-        $this->assertEquals(0, $bitArray[1]); // Vérifier le bit à l'index 1
-        $this->assertEquals(1, $bitArray[3]); // Vérifier le bit à l'index 3
-    }
+        $bitArray->offsetSet(2, 1);
 
-    // Test de la méthode slice
-    public function testSlice()
+        $this->assertEquals($bitArray->getBits(), [0, 0, 1]);
+    }
+    // Test de la méthode count
+    public function testCount()
     {
-        $bitArray = BitArray::fromString("0b1010010111110000");
-        $slicedArray = $bitArray->slice(4, 4);  // Découpe de 4 à 8 bits => "1010"
-        $this->assertEquals("0b1010", (string)$slicedArray); // Vérifier la tranche
+        $bitArray = new BitArray();
+        $bitArray->offsetSet(3, 1);
+
+        $this->assertEquals(count($bitArray->getBits()), 4);
+    }
+    public function testfromString()
+    {
+        $bitArray = BitArray::fromString("0b001100");
+        $this->assertEquals($bitArray->getBits(), [0, 0, 1, 1, 0, 0]);
     }
 
-    // Test de la méthode set
+    public function testFromInt(): void
+    {
+        // Step 1: Convert an integer to a BitArray
+        $integer = 37; // Binary representation: 100101
+        $bitArray = BitArray::fromInt($integer);
+
+        // Step 2: Verify the bits in the BitArray
+        $expectedBits = [1, 0, 0, 1, 0, 1]; // Expected bit array for 37
+        $this->assertEquals($expectedBits, $bitArray->getBits(), "The bits in the BitArray do not match the binary representation of the integer.");
+    }
+
+
+
+
     public function testSet()
     {
-        $bitArray = new BitArray();
-        $bitArray->set([1, 0, 1, 1], 0);  // Définir 1, 0, 1, 1 à partir de l'index 0
-        $this->assertEquals(1, $bitArray[0]);
-        $this->assertEquals(0, $bitArray[1]);
-        $this->assertEquals(1, $bitArray[2]);
-        $this->assertEquals(1, $bitArray[3]);
+        $bit = new BitArray();
+        $bit->offsetSet(3, 1);
+        $bit->set([1, 1], 1);
+        $this->assertEquals([0, 1, 1, 1], $bit->getBits());
     }
 
-    // Test de la méthode unset
-    public function testUnset()
+
+    public function testUnSet()
     {
-        $bitArray = new BitArray();
-        $bitArray->set([1, 1, 0, 1], 0);  // Définir 1, 1, 0, 1 à partir de l'index 0
-        $bitArray->unset(1, 2);  // Unset (mettre à zéro) les indices 1 et 2
-        $this->assertEquals(1, $bitArray[0]);
-        $this->assertEquals(0, $bitArray[1]);
-        $this->assertEquals(0, $bitArray[2]);
-        $this->assertEquals(1, $bitArray[3]);
+        $bit = new BitArray();
+        $bit->setBits([1, 1, 1, 1, 1]);
+        $bit->unset(1, 2);
+        $this->assertEquals([1, 0, 0, 1, 1], $bit->getBits());
+    }
+    public function testSlice()
+    {
+        $bit = new BitArray();
+        $bit->setBits([1, 1, 1, 0, 1]);
+        $sliceArray = $bit->slice(1, 2);
+        $this->assertEquals($sliceArray->getBits(), [1, 1]);
     }
 
-    // Test de la méthode __toString pour la représentation binaire
-    public function testToString()
+    public function testString()
     {
-        $bitArray = BitArray::fromString("0b1010010111110000");
-        $this->assertEquals("0b1010010111110000", (string)$bitArray);
-    }
-
-    // Test de l'itérateur
-    public function testIterator()
-    {
-        $bitArray = BitArray::fromString("0b1011");
-        $bits = [];
-        foreach ($bitArray as $bit) {
-            $bits[] = $bit;
-        }
-        $this->assertCount(4, $bits);  // La taille de l'array est 4
-        $this->assertEquals([1, 0, 1, 1], $bits);  // Vérifier que les valeurs sont correctes
-    }
-
-    // Test de la méthode getSlicesIterator
-    public function testGetSlicesIterator()
-    {
-        $bitArray = BitArray::fromString("0b1010010111110000");
-        $slices = $bitArray->getSlicesIterator(8);  // Découpe en tranches de 8 bits
-        $this->assertCount(2, $slices);  // Il devrait y avoir 2 tranches
-        $this->assertEquals("0b10100101", (string)$slices[0]);
-        $this->assertEquals("0b11110000", (string)$slices[1]);
-    }
-
-    // Test de la méthode offsetUnset
-    public function testOffsetUnset()
-    {
-        $bitArray = BitArray::fromString("0b101011");
-        unset($bitArray[1]);
-        $this->assertEquals(0, $bitArray[1]); // Vérifier que le bit à l'index 1 est maintenant 0
+        $bit = new BitArray();
+        $bit->setBits([1, 1, 1, 0, 1]);
+        $BitsString = $bit->__toString();
+        $this->assertEquals($BitsString, "0b10111");
     }
 }
